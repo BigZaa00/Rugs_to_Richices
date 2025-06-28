@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>$LOTTO: 12:17 Forex Frenzy</title>
+  <title>$LOTTO: 12:17 Meme Monopoly</title>
   <style>
     body {
-      background: #1e222d;
-      color: #d3d4d5;
+      background: #1e2124;
+      color: #d1d4dc;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
       min-height: 100vh;
+      overflow: hidden;
     }
     #login-screen {
       margin-top: 20vh;
@@ -31,60 +31,61 @@
     #game-screen {
       display: none;
       width: 100%;
-      max-width: 1200px;
-      margin: 20px;
+      height: 100vh;
       display: flex;
       flex-direction: row;
     }
-    #chart-container {
-      flex: 3;
-      background: #252a3a;
-      border-radius: 8px;
+    #left-sidebar {
+      width: 200px;
+      background: #2a2e39;
       padding: 10px;
-      position: relative;
+      border-right: 1px solid #3a3f4f;
+      overflow-y: auto;
     }
-    #ticker {
-      background: #1a1e2a;
-      padding: 8px;
-      font-size: 1em;
-      white-space: nowrap;
-      overflow: hidden;
-      animation: scroll 15s linear infinite;
-      border-bottom: 1px solid #3a3f4f;
-    }
-    @keyframes scroll {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-    #sidebar {
-      flex: 1;
-      background: #252a3a;
-      border-radius: 8px;
-      padding: 15px;
-      margin-left: 10px;
-      text-align: left;
-    }
-    #sidebar h2 {
+    #left-sidebar h3 {
       color: #00ff00;
-      font-size: 1.5em;
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+    #left-sidebar p {
+      margin: 5px 0;
+      font-size: 0.9em;
+    }
+    #board-container {
+      flex: 1;
+      background: #2a2e39;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #right-sidebar {
+      width: 250px;
+      background: #2a2e39;
+      padding: 10px;
+      border-left: 1px solid #3a3f4f;
+      overflow-y: auto;
+    }
+    #right-sidebar h2 {
+      color: #00ff00;
+      font-size: 1.3em;
       margin-bottom: 10px;
     }
-    #sidebar p {
-      margin: 8px 0;
+    #right-sidebar p {
+      margin: 5px 0;
       font-size: 0.9em;
     }
     canvas {
-      width: 100%;
-      height: 200px;
-      background: #1e222d;
-      margin-bottom: 10px;
+      width: 500px;
+      height: 500px;
+      background: #1e2124;
     }
     button {
       background: #00ff00;
       color: #000;
-      padding: 8px 16px;
+      padding: 8px;
       border: none;
-      border-radius: 4px;
+      border-radius: 3px;
       cursor: pointer;
       font-size: 0.9em;
       margin: 5px 0;
@@ -93,48 +94,41 @@
     button:hover {
       background: #00cc00;
     }
-    .tooltip {
-      position: absolute;
-      background: #3a3f4f;
-      color: #d3d4d5;
-      padding: 5px;
-      border-radius: 4px;
-      font-size: 0.8em;
-      display: none;
-      pointer-events: none;
+    button:disabled {
+      background: #4a4f5f;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
   <div id="login-screen">
-    <h1>$LOTTO: 12:17 Forex Frenzy</h1>
-    <p>Connect your Phantom wallet to trade forex markets, indices, and buy lottery tickets for the 12.17 SOL draw!</p>
+    <h1>$LOTTO: 12:17 Meme Monopoly</h1>
+    <p>Connect your Phantom wallet to buy meme properties and win the 12.17 SOL draw!</p>
     <button onclick="connectWallet()">Connect Phantom Wallet</button>
   </div>
   <div id="game-screen">
-    <div id="chart-container">
-      <div id="ticker">$LOTTO News: Buy tickets for the 12.17 SOL draw on June 21, 2026! | Prize Pool: 12.17 SOL</div>
-      <canvas id="lotto-chart"></canvas>
-      <canvas id="solusd-chart"></canvas>
-      <canvas id="memeindex-chart"></canvas>
-      <div class="tooltip" id="tooltip"></div>
+    <div id="left-sidebar">
+      <h3>Player Stats</h3>
+      <p>Position: <span id="player-position">Go</span></p>
+      <p>Meme Coins: <span id="meme-coins">0</span></p>
+      <p>SOL Balance: <span id="sol-balance">0</span></p>
     </div>
-    <div id="sidebar">
+    <div id="board-container">
+      <canvas id="board-canvas"></canvas>
+    </div>
+    <div id="right-sidebar">
       <h2>$LOTTO Lottery</h2>
       <p>Next Draw: <span id="draw-date">June 21, 2026</span></p>
       <p>Ticket Price: <span id="ticket-price">0.1 SOL</span></p>
       <p>Prize Pool: <span id="prize-pool">12.17 SOL</span></p>
       <p>Tickets Owned: <span id="tickets-owned">0</span></p>
-      <h2>Market Data</h2>
-      <p>$LOTTO Price: <span id="token-price">0 SOL</span></p>
-      <p>SOL/USD: <span id="solusd-price">150.00</span></p>
-      <p>Meme Index: <span id="memeindex-price">1000.00</span></p>
-      <p>Portfolio Value: <span id="portfolio-value">0 SOL</span></p>
       <p>Wallet: <span id="wallet-address">Not connected</span></p>
-      <p>SOL Balance: <span id="sol-balance">0</span></p>
-      <button onclick="buyTicket()">Buy Lottery Ticket (0.1 SOL)</button>
-      <button onclick="tradeAsset('buy')">Buy Meme Stock (Mock)</button>
-      <button onclick="tradeAsset('sell')">Sell Meme Stock (Mock)</button>
+      <h2>Game Actions</h2>
+      <p>Current Space: <span id="current-space">Go</span></p>
+      <button id="roll-button" onclick="rollDice()">Roll Dice</button>
+      <button id="buy-button" onclick="buyProperty()" disabled>Buy Property (0.01 SOL)</button>
+      <button id="house-button" onclick="buyHouse()" disabled>Buy House (0.01 SOL)</button>
+      <button id="ticket-button" onclick="buyTicket()">Buy Ticket (0.1 SOL)</button>
       <a href="https://pump.fun" target="_blank"><button>Buy $LOTTO</button></a>
     </div>
   </div>
@@ -144,141 +138,128 @@
     let walletPublicKey = null;
     let solBalance = 0;
     let ticketCount = 0; // Mock: track tickets off-chain
+    let memeCoins = 0; // Mock: in-game currency
+    let memeIndex = 1000.00; // Meme Index value
+    let playerPosition = 0; // Board position (0-39)
+    let properties = Array(40).fill(null); // null: unowned, {owner: wallet, houses: 0, value: 0.01}
+    let currentSpace = 'Go';
     let prizePool = 12.17; // Fixed prize pool
-    let tokenPrice = 0.000001; // Mock: $LOTTO price
-    let solUsdPrice = 150.00; // Mock: SOL/USD forex pair
-    let memeIndexPrice = 1000.00; // Mock: Meme Index
-    let portfolio = { lotto: 0, solusd: 0, memeindex: 0 }; // Mock portfolio
-    let lottoHistory = Array(10).fill(0.000001);
-    let solUsdHistory = Array(10).fill(150.00);
-    let memeIndexHistory = Array(10).fill(1000.00);
     const DRAW_DATE = new Date('2026-06-21T00:00:00Z');
-    const newsEvents = [
-      'Meme Fed raises rates, SOL/USD dips!',
-      'Hedge Fund Bot pumps $LOTTO!',
-      'Crypto Index surges on NPC hype!',
-      'Meme Index crashes, traders panic!'
+    const board = [
+      'Go', 'Doge Street', 'Chance', 'Shiba Lane', 'Jail', 'Pepe Avenue', 'Meme Tax', 'Wojak Road',
+      'Community Chest', 'HODL Plaza', 'Free Parking', 'Moon Street', 'Chance', 'Rocket Lane',
+      'Go To Jail', 'Bull Market', 'Bear Market', 'Crypto Station', 'Community Chest', 'Hype Boulevard',
+      'Meme Index HQ', 'Pump Street', 'Chance', 'Dump Road', 'Jail', 'FOMO Avenue', 'FUD Lane',
+      'Blockchain Bay', 'Community Chest', 'DeFi Drive', 'Free Parking', 'Rug Pull Road', 'Chance',
+      'Diamond Hands', 'Go To Jail', 'Paper Hands', 'Whale Way', 'Crypto Casino', 'Community Chest',
+      'Moon Plaza', 'Luxury Tax'
     ];
-    const disasters = ['Hurricane', 'Flash Crash', 'NPC Hack', 'Market Freeze'];
+    const propertyPrices = Array(40).fill(0.01); // 0.01 SOL per property
+    const baseRents = Array(40).fill(0.005); // 0.005 SOL base rent
+    const houseRents = [0.01, 0.02, 0.03, 0.04]; // Rent per house
+    const events = [
+      'Elon Musk tweets about $LOTTO, +20% property values!',
+      'Bitcoin ETF approved, meme properties boom +15%!',
+      'SEC crypto ban rumor, Meme Index -20%!',
+      'Crypto whale buys $LOTTO, +10% rent!'
+    ];
+    const disasters = ['AI Hack crashes Meme Index!', 'Crypto Crash wipes values!', 'Rug Pull hits board!', 'Market Freeze!'];
 
-    // NPC-driven market updates
+    // Update Meme Index and properties
     function updateMarket() {
-      // NPC Meme Fed: Randomly adjust prices
-      tokenPrice *= (1 + (Math.random() - 0.5) * 0.1); // $LOTTO volatility
-      solUsdPrice *= (1 + (Math.random() - 0.5) * 0.05); // SOL/USD volatility
-      memeIndexPrice *= (1 + (Math.random() - 0.5) * 0.03); // Meme Index volatility
+      memeIndex *= (1 + (Math.random() - 0.5) * 0.1); // Fluctuate ±10%
+      memeIndex = Math.max(100, Math.round(memeIndex * 100) / 100);
 
-      // Rug pulls (5% chance for $LOTTO or index)
+      // Rug pulls (5% chance)
       if (Math.random() < 0.05) {
-        tokenPrice *= 0.1; // NPC-driven rug pull
-        lottoHistory.fill(tokenPrice); // Reset history
-      }
-      if (Math.random() < 0.05) {
-        memeIndexPrice *= 0.1; // NPC-driven index crash
-        memeIndexHistory.fill(memeIndexPrice);
-      }
-
-      // Update histories
-      lottoHistory.push(tokenPrice);
-      solUsdHistory.push(solUsdPrice);
-      memeIndexHistory.push(memeIndexPrice);
-      if (lottoHistory.length > 10) lottoHistory.shift();
-      if (solUsdHistory.length > 10) solUsdHistory.shift();
-      if (memeIndexHistory.length > 10) memeIndexHistory.shift();
-    }
-
-    // Update ticker, charts, and portfolio
-    function updateTicker() {
-      if (!walletConnected) return;
-      updateMarket();
-      const now = new Date();
-      const timeLeft = DRAW_DATE - now;
-      const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-      let tickerText = `$LOTTO News: ${daysLeft} days until 12.17 SOL draw! | Prize Pool: ${prizePool.toFixed(2)} SOL`;
-
-      // Forex Factory-style news (10% chance)
-      if (Math.random() < 0.1) {
-        tickerText = newsEvents[Math.floor(Math.random() * newsEvents.length)];
+        memeIndex *= 0.5;
+        properties = properties.map(p => p ? { ...p, value: p.value * 0.5 } : p);
+        alert('Rug pull! Meme Index and property values crashed!');
       }
 
       // AI-driven disasters (2% chance)
       if (Math.random() < 0.02) {
         const disaster = disasters[Math.floor(Math.random() * disasters.length)];
-        tickerText = `DISASTER: ${disaster} hits markets! Prize pool secure at ${prizePool.toFixed(2)} SOL!`;
-        tokenPrice *= 0.8; // Disaster impact
-        solUsdPrice *= 0.9;
-        memeIndexPrice *= 0.85;
+        memeIndex *= 0.5;
+        properties = properties.map(p => p ? { ...p, value: p.value * 0.5 } : p);
+        memeCoins = Math.max(0, memeCoins - 100);
+        alert(`DISASTER: ${disaster} Meme Coins lost!`);
       }
 
-      document.getElementById('ticker').textContent = tickerText;
+      // Real-world events (10% chance)
+      if (Math.random() < 0.1) {
+        const event = events[Math.floor(Math.random() * events.length)];
+        if (event.includes('+20%') || event.includes('boom')) {
+          memeIndex *= 1.2;
+          properties = properties.map(p => p ? { ...p, value: p.value * 1.2 } : p);
+        } else if (event.includes('-20%')) {
+          memeIndex *= 0.8;
+          properties = properties.map(p => p ? { ...p, value: p.value * 0.8 } : p);
+        } else if (event.includes('+10% rent')) {
+          baseRents.fill(0.005 * 1.1);
+        }
+        alert(`Event: ${event}`);
+      }
+    }
+
+    // Update game state
+    function updateGame() {
+      if (!walletConnected) return;
+      updateMarket();
+      const now = new Date();
+      const timeLeft = DRAW_DATE - now;
+      const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
       document.getElementById('draw-date').textContent = `June 21, 2026 (${daysLeft} days left)`;
       document.getElementById('prize-pool').textContent = `${prizePool.toFixed(2)} SOL`;
       document.getElementById('tickets-owned').textContent = ticketCount;
-      document.getElementById('token-price').textContent = `${tokenPrice.toFixed(6)} SOL`;
-      document.getElementById('solusd-price').textContent = `${solUsdPrice.toFixed(2)} USD`;
-      document.getElementById('memeindex-price').textContent = `${memeIndexPrice.toFixed(2)}`;
-      document.getElementById('portfolio-value').textContent = (
-        portfolio.lotto * tokenPrice +
-        portfolio.solusd * solUsdPrice / 100 +
-        portfolio.memeindex * memeIndexPrice / 1000
-      ).toFixed(4);
-
-      drawCharts();
-      setTimeout(updateTicker, 5000);
+      document.getElementById('meme-coins').textContent = memeCoins;
+      document.getElementById('player-position').textContent = board[playerPosition];
+      document.getElementById('current-space').textContent = board[playerPosition];
+      drawBoard();
+      setTimeout(updateGame, 5000);
     }
 
-    // Draw candlestick charts
-    function drawCharts() {
-      const charts = [
-        { canvasId: 'lotto-chart', history: lottoHistory, label: '$LOTTO' },
-        { canvasId: 'solusd-chart', history: solUsdHistory, label: 'SOL/USD' },
-        { canvasId: 'memeindex-chart', history: memeIndexHistory, label: 'Meme Index' }
-      ];
+    // Draw board
+    function drawBoard() {
+      const boardCanvas = document.getElementById('board-canvas');
+      const boardCtx = boardCanvas.getContext('2d');
+      boardCtx.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
 
-      charts.forEach(chart => {
-        const canvas = document.getElementById(chart.canvasId);
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        const maxPrice = Math.max(...chart.history);
-        const minPrice = Math.min(...chart.history);
-        const range = maxPrice - minPrice || 0.000001;
-        const candleWidth = canvas.width / (chart.history.length * 1.5);
-        chart.history.forEach((price, i) => {
-          const open = i > 0 ? chart.history[i - 1] : price;
-          const close = price;
-          const high = Math.max(open, close) * (1 + Math.random() * 0.02);
-          const low = Math.min(open, close) * (1 - Math.random() * 0.02);
-          const x = i * candleWidth * 1.5 + candleWidth / 2;
-          const yHigh = ((maxPrice - high) / range) * canvas.height;
-          const yLow = ((maxPrice - low) / range) * canvas.height;
-          const yOpen = ((maxPrice - open) / range) * canvas.height;
-          const yClose = ((maxPrice - close) / range) * canvas.height;
-          ctx.beginPath();
-          ctx.moveTo(x, yHigh);
-          ctx.lineTo(x, yLow);
-          ctx.strokeStyle = '#fff';
-          ctx.stroke();
-          ctx.fillStyle = close >= open ? '#00ff00' : '#ff0000';
-          ctx.fillRect(x - candleWidth / 2, Math.min(yOpen, yClose), candleWidth, Math.abs(yClose - yOpen));
-        });
+      // Draw grid (simplified board)
+      const size = Math.min(boardCanvas.width, boardCanvas.height);
+      const cellSize = size / 5;
+      boardCtx.strokeStyle = '#3a3f4f';
+      for (let i = 0; i <= 5; i++) {
+        boardCtx.beginPath();
+        boardCtx.moveTo(i * cellSize, 0);
+        boardCtx.lineTo(i * cellSize, size);
+        boardCtx.moveTo(0, i * cellSize);
+        boardCtx.lineTo(size, i * cellSize);
+        boardCtx.stroke();
+      }
 
-        // Tooltip on hover
-        canvas.onmousemove = (e) => {
-          const rect = canvas.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const index = Math.floor((x / canvas.width) * chart.history.length);
-          if (index >= 0 && index < chart.history.length) {
-            const price = chart.history[index];
-            const tooltip = document.getElementById('tooltip');
-            tooltip.textContent = `${chart.label}: ${price.toFixed(6)}`;
-            tooltip.style.display = 'block';
-            tooltip.style.left = `${e.clientX + 10}px`;
-            tooltip.style.top = `${e.clientY + 10}px`;
-          }
-        };
-        canvas.onmouseleave = () => {
-          document.getElementById('tooltip').style.display = 'none';
-        };
+      // Draw properties and player
+      board.forEach((space, i) => {
+        const row = Math.floor(i / 10);
+        const col = i % 10;
+        let x, y;
+        if (row === 0) { x = col * cellSize; y = 0; }
+        else if (row === 1) { x = 5 * cellSize; y = (col % 5) * cellSize; }
+        else if (row === 2) { x = (5 - (col % 5)) * cellSize; y = 5 * cellSize; }
+        else { x = 0; y = (5 - (col % 5)) * cellSize; }
+        boardCtx.fillStyle = properties[i] ? '#26a69a' : '#ef5350';
+        boardCtx.fillRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+        if (i === playerPosition) {
+          boardCtx.fillStyle = '#00ff00';
+          boardCtx.beginPath();
+          boardCtx.arc(x + cellSize / 2, y + cellSize / 2, cellSize / 4, 0, 2 * Math.PI);
+          boardCtx.fill();
+        }
+        if (properties[i] && properties[i].houses > 0) {
+          boardCtx.fillStyle = '#ffffff';
+          boardCtx.font = '12px Arial';
+          boardCtx.fillText(properties[i].houses, x + cellSize / 2 - 5, y + cellSize / 2 + 5);
+        }
       });
     }
 
@@ -293,7 +274,7 @@
           document.getElementById('login-screen').style.display = 'none';
           document.getElementById('game-screen').style.display = 'flex';
           await updateSolBalance();
-          updateTicker();
+          updateGame();
         } catch (err) {
           alert('Connection failed: ' + err.message);
         }
@@ -310,6 +291,133 @@
         const balance = await connection.getBalance(publicKey);
         solBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
         document.getElementById('sol-balance').textContent = solBalance.toFixed(4);
+      }
+    }
+
+    // Roll dice and move
+    function rollDice() {
+      if (!walletConnected) {
+        alert('Connect your Phantom wallet!');
+        return;
+      }
+      const dice1 = Math.floor(Math.random() * 6) + 1;
+      const dice2 = Math.floor(Math.random() * 6) + 1;
+      playerPosition = (playerPosition + dice1 + dice2) % 40;
+      currentSpace = board[playerPosition];
+      document.getElementById('player-position').textContent = currentSpace;
+      document.getElementById('current-space').textContent = currentSpace;
+      document.getElementById('buy-button').disabled = true;
+      document.getElementById('house-button').disabled = true;
+
+      // Handle space actions
+      if (currentSpace.includes('Chance') || currentSpace.includes('Community Chest')) {
+        const event = events[Math.floor(Math.random() * events.length)];
+        if (event.includes('+20%') || event.includes('boom')) {
+          memeIndex *= 1.2;
+          properties = properties.map(p => p ? { ...p, value: p.value * 1.2 } : p);
+        } else if (event.includes('-20%')) {
+          memeIndex *= 0.8;
+          properties = properties.map(p => p ? { ...p, value: p.value * 0.8 } : p);
+        } else if (event.includes('+10% rent')) {
+          baseRents.fill(0.005 * 1.1);
+        }
+        alert(`Card: ${event}`);
+      } else if (currentSpace === 'Jail' || currentSpace === 'Go To Jail') {
+        playerPosition = board.indexOf('Jail');
+        alert('Sent to Jail!');
+      } else if (currentSpace === 'Meme Tax' || currentSpace === 'Luxury Tax') {
+        memeCoins = Math.max(0, memeCoins - 50);
+        alert('Paid 50 Meme Coins in tax!');
+      } else if (properties[playerPosition] && properties[playerPosition].owner !== walletPublicKey) {
+        const rent = baseRents[playerPosition] * (properties[playerPosition].houses + 1);
+        memeCoins = Math.max(0, memeCoins - rent * 100);
+        alert(`Paid ${rent * 100} Meme Coins in rent to ${properties[playerPosition].owner.slice(0, 4)}...!`);
+      } else if (!properties[playerPosition] && !['Go', 'Jail', 'Free Parking', 'Go To Jail', 'Meme Tax', 'Luxury Tax'].includes(currentSpace)) {
+        document.getElementById('buy-button').disabled = false;
+      } else if (properties[playerPosition] && properties[playerPosition].owner === walletPublicKey && properties[playerPosition].houses < 4) {
+        document.getElementById('house-button').disabled = false;
+      }
+      document.getElementById('meme-coins').textContent = memeCoins;
+      drawBoard();
+    }
+
+    // Buy property (mock, actual requires backend)
+    async function buyProperty() {
+      if (!walletConnected) {
+        alert('Connect your Phantom wallet!');
+        return;
+      }
+      if (solBalance < 0.01) {
+        alert('Insufficient SOL balance!');
+        return;
+      }
+      if (properties[playerPosition]) {
+        alert('Property already owned!');
+        return;
+      }
+      try {
+        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'));
+        const transaction = new solanaWeb3.Transaction().add(
+          solanaWeb3.SystemProgram.transfer({
+            fromPubkey: new solanaWeb3.PublicKey(walletPublicKey),
+            toPubkey: new solanaWeb3.PublicKey('YourGameWalletPublicKeyHere'), // Replace with actual game wallet
+            lamports: 0.01 * solanaWeb3.LAMPORTS_PER_SOL
+          })
+        );
+        const signature = await window.solana.signAndSendTransaction(transaction);
+        await connection.confirmTransaction(signature);
+        solBalance -= 0.01;
+        properties[playerPosition] = { owner: walletPublicKey, houses: 0, value: 0.01 };
+        memeCoins += 100; // Bonus for buying
+        document.getElementById('sol-balance').textContent = solBalance.toFixed(4);
+        document.getElementById('meme-coins').textContent = memeCoins;
+        document.getElementById('buy-button').disabled = true;
+        alert(`Bought ${currentSpace} for 0.01 SOL! Earned 100 Meme Coins!`);
+        drawBoard();
+      } catch (err) {
+        alert('Property purchase failed: ' + err.message);
+      }
+    }
+
+    // Buy house (mock, actual requires backend)
+    async function buyHouse() {
+      if (!walletConnected) {
+        alert('Connect your Phantom wallet!');
+        return;
+      }
+      if (solBalance < 0.01) {
+        alert('Insufficient SOL balance!');
+        return;
+      }
+      if (!properties[playerPosition] || properties[playerPosition].owner !== walletPublicKey) {
+        alert('You don’t own this property!');
+        return;
+      }
+      if (properties[playerPosition].houses >= 4) {
+        alert('Max houses reached!');
+        return;
+      }
+      try {
+        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('devnet'));
+        const transaction = new solanaWeb3.Transaction().add(
+          solanaWeb3.SystemProgram.transfer({
+            fromPubkey: new solanaWeb3.PublicKey(walletPublicKey),
+            toPubkey: new solanaWeb3.PublicKey('YourGameWalletPublicKeyHere'), // Replace with actual game wallet
+            lamports: 0.01 * solanaWeb3.LAMPORTS_PER_SOL
+          })
+        );
+        const signature = await window.solana.signAndSendTransaction(transaction);
+        await connection.confirmTransaction(signature);
+        solBalance -= 0.01;
+        properties[playerPosition].houses += 1;
+        memeCoins += 50; // Bonus for building
+        document.getElementById('sol-balance').textContent = solBalance.toFixed(4);
+        document.getElementById('meme-coins').textContent = memeCoins;
+        document.getElementById('house-button').disabled = properties[playerPosition].houses >= 4;
+        alert(`Bought a house on ${currentSpace} for 0.01 SOL! Earned 50 Meme Coins!`);
+        drawBoard();
+      } catch (err) {
+        alert('House purchase failed: ' + err.message);
       }
     }
 
@@ -342,27 +450,6 @@
       } catch (err) {
         alert('Ticket purchase failed: ' + err.message);
       }
-    }
-
-    // Mock trade (buy/sell assets)
-    function tradeAsset(action) {
-      if (!walletConnected) {
-        alert('Connect your Phantom wallet!');
-        return;
-      }
-      const asset = Math.random() < 0.5 ? 'lotto' : Math.random() < 0.5 ? 'solusd' : 'memeindex';
-      const price = asset === 'lotto' ? tokenPrice : asset === 'solusd' ? solUsdPrice / 100 : memeIndexPrice / 1000;
-      if (action === 'buy') {
-        portfolio[asset] += 1;
-      } else if (portfolio[asset] > 0) {
-        portfolio[asset] -= 1;
-      }
-      document.getElementById('portfolio-value').textContent = (
-        portfolio.lotto * tokenPrice +
-        portfolio.solusd * solUsdPrice / 100 +
-        portfolio.memeindex * memeIndexPrice / 1000
-      ).toFixed(4);
-      alert(`${action.charAt(0).toUpperCase() + action.slice(1)} ${asset.toUpperCase()} (Mock)!`);
     }
   </script>
 </body>
