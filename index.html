@@ -76,9 +76,10 @@
       font-size: 0.9em;
     }
     canvas {
-      width: 500px;
-      height: 500px;
+      width: 600px;
+      height: 600px;
       background: #1e2124;
+      border: 2px solid #3a3f4f;
     }
     button {
       background: #00ff00;
@@ -112,6 +113,7 @@
       <p>Position: <span id="player-position">Go</span></p>
       <p>Meme Coins: <span id="meme-coins">0</span></p>
       <p>SOL Balance: <span id="sol-balance">0</span></p>
+      <p>Player Color: <span id="player-color">Green</span></p>
     </div>
     <div id="board-container">
       <canvas id="board-canvas"></canvas>
@@ -144,6 +146,8 @@
     let properties = Array(40).fill(null); // null: unowned, {owner: wallet, houses: 0, value: 0.01}
     let currentSpace = 'Go';
     let prizePool = 12.17; // Fixed prize pool
+    const playerColor = '#00ff00'; // Green for Player 1 (mocked single-player)
+    const otherPlayerColors = ['#2196f3', '#ef5350', '#ffeb3b']; // Blue, Red, Yellow for others
     const DRAW_DATE = new Date('2026-06-21T00:00:00Z');
     const board = [
       'Go', 'Doge Street', 'Chance', 'Shiba Lane', 'Jail', 'Pepe Avenue', 'Meme Tax', 'Wojak Road',
@@ -153,6 +157,12 @@
       'Blockchain Bay', 'Community Chest', 'DeFi Drive', 'Free Parking', 'Rug Pull Road', 'Chance',
       'Diamond Hands', 'Go To Jail', 'Paper Hands', 'Whale Way', 'Crypto Casino', 'Community Chest',
       'Moon Plaza', 'Luxury Tax'
+    ];
+    const propertyGroups = [
+      '#8b008b', '#8b008b', null, '#8b008b', null, '#00b7eb', null, '#00b7eb', // Bottom row
+      null, '#ffa500', null, '#ff4500', null, '#ff4500', null, '#00ff00', '#00ff00', null, null, '#ff4040', // Right
+      null, '#ff4040', null, '#b22222', null, '#b22222', '#b22222', null, null, '#ffd700', // Top
+      null, '#ffd700', null, '#228b22', null, '#228b22', '#228b22', null, null, '#6a5acd' // Left
     ];
     const propertyPrices = Array(40).fill(0.01); // 0.01 SOL per property
     const baseRents = Array(40).fill(0.005); // 0.005 SOL base rent
@@ -219,46 +229,97 @@
       setTimeout(updateGame, 5000);
     }
 
-    // Draw board
+    // Draw 40-square board
     function drawBoard() {
       const boardCanvas = document.getElementById('board-canvas');
       const boardCtx = boardCanvas.getContext('2d');
       boardCtx.clearRect(0, 0, boardCanvas.width, boardCanvas.height);
-
-      // Draw grid (simplified board)
       const size = Math.min(boardCanvas.width, boardCanvas.height);
-      const cellSize = size / 5;
-      boardCtx.strokeStyle = '#3a3f4f';
-      for (let i = 0; i <= 5; i++) {
-        boardCtx.beginPath();
-        boardCtx.moveTo(i * cellSize, 0);
-        boardCtx.lineTo(i * cellSize, size);
-        boardCtx.moveTo(0, i * cellSize);
-        boardCtx.lineTo(size, i * cellSize);
-        boardCtx.stroke();
-      }
+      const outerSize = size;
+      const innerSize = size * 0.7;
+      const borderWidth = (size - innerSize) / 2;
+      const cellSize = innerSize / 9; // 9 cells per side (excluding corners)
+      const cornerSize = borderWidth; // Corners match border width
 
-      // Draw properties and player
+      // Draw board outline
+      boardCtx.fillStyle = '#1e2124';
+      boardCtx.fillRect(0, 0, size, size);
+      boardCtx.fillStyle = '#3a3f4f';
+      boardCtx.fillRect(borderWidth, borderWidth, innerSize, innerSize);
+
+      // Draw 40 squares
       board.forEach((space, i) => {
-        const row = Math.floor(i / 10);
-        const col = i % 10;
-        let x, y;
-        if (row === 0) { x = col * cellSize; y = 0; }
-        else if (row === 1) { x = 5 * cellSize; y = (col % 5) * cellSize; }
-        else if (row === 2) { x = (5 - (col % 5)) * cellSize; y = 5 * cellSize; }
-        else { x = 0; y = (5 - (col % 5)) * cellSize; }
+        let x, y, width, height, rotation = 0;
+        const side = Math.floor(i / 10);
+        const pos = i % 10;
+        if (side === 0) { // Bottom (0-9)
+          x = (9 - pos) * cellSize + borderWidth;
+          y = size - borderWidth;
+          width = pos === 0 || pos === 9 ? cornerSize : cellSize;
+          height = borderWidth;
+        } else if (side === 1) { // Right (10-19)
+          x = size - borderWidth;
+          y = (9 - pos) * cellSize + borderWidth;
+          width = borderWidth;
+          height = pos === 0 || pos === 9 ? cornerSize : cellSize;
+          rotation = Math.PI / 2;
+        } else if (side === 2) { // Top (20-29)
+          x = pos * cellSize + borderWidth;
+          y = 0;
+          width = pos === 0 || pos === 9 ? cornerSize : cellSize;
+          height = borderWidth;
+          rotation = Math.PI;
+        } else { // Left (30-39)
+          x = 0;
+          y = pos * cellSize + borderWidth;
+          width = borderWidth;
+          height = pos === 0 || pos === 9 ? cornerSize : cellSize;
+          rotation = -Math.PI / 2;
+        }
+
+        // Draw square
+        boardCtx.save();
+        boardCtx.translate(x + width / 2, y + height / 2);
+        boardCtx.rotate(rotation);
+        boardCtx.fillStyle = propertyGroups[i] || '#ffffff';
+        boardCtx.fillRect(-width / 2, -height / 2, width, height / 2); // Color band
         boardCtx.fillStyle = properties[i] ? '#26a69a' : '#ef5350';
-        boardCtx.fillRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+        boardCtx.fillRect(-width / 2, -height / 2 + height / 2, width, height / 2); // Property
+        boardCtx.fillStyle = '#ffffff';
+        boardCtx.font = '10px Arial';
+        boardCtx.textAlign = 'center';
+        boardCtx.fillText(space.slice(0, 8), 0, -height / 4);
+        if (properties[i] && properties[i].houses > 0) {
+          for (let h = 0; h < properties[i].houses; h++) {
+            boardCtx.fillRect(-width / 2 + h * 8 + 2, height / 4 - 6, 6, 6);
+          }
+        }
+        boardCtx.restore();
+
+        // Draw player token
         if (i === playerPosition) {
-          boardCtx.fillStyle = '#00ff00';
+          boardCtx.fillStyle = playerColor;
           boardCtx.beginPath();
-          boardCtx.arc(x + cellSize / 2, y + cellSize / 2, cellSize / 4, 0, 2 * Math.PI);
+          boardCtx.arc(x + width / 2, y + height / 2, Math.min(width, height) / 4, 0, 2 * Math.PI);
           boardCtx.fill();
         }
-        if (properties[i] && properties[i].houses > 0) {
+      });
+
+      // Draw special space icons (simplified)
+      const specialSpaces = ['Go', 'Jail', 'Free Parking', 'Go To Jail'];
+      board.forEach((space, i) => {
+        if (specialSpaces.includes(space)) {
+          const side = Math.floor(i / 10);
+          const pos = i % 10;
+          let x, y;
+          if (side === 0) { x = (9 - pos) * cellSize + borderWidth; y = size - borderWidth; }
+          else if (side === 1) { x = size - borderWidth; y = (9 - pos) * cellSize + borderWidth; }
+          else if (side === 2) { x = pos * cellSize + borderWidth; y = 0; }
+          else { x = 0; y = pos * cellSize + borderWidth; }
           boardCtx.fillStyle = '#ffffff';
-          boardCtx.font = '12px Arial';
-          boardCtx.fillText(properties[i].houses, x + cellSize / 2 - 5, y + cellSize / 2 + 5);
+          boardCtx.font = '14px Arial';
+          boardCtx.textAlign = 'center';
+          boardCtx.fillText(space[0], x + cornerSize / 2, y + cornerSize / 2);
         }
       });
     }
@@ -324,6 +385,8 @@
         alert(`Card: ${event}`);
       } else if (currentSpace === 'Jail' || currentSpace === 'Go To Jail') {
         playerPosition = board.indexOf('Jail');
+        document.getElementById('player-position').textContent = 'Jail';
+        document.getElementById('current-space').textContent = 'Jail';
         alert('Sent to Jail!');
       } else if (currentSpace === 'Meme Tax' || currentSpace === 'Luxury Tax') {
         memeCoins = Math.max(0, memeCoins - 50);
