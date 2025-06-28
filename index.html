@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>$LOTTO: 12:17 Trading Rug Jamboree</title>
+  <title>$LOTTO: 12:17 Forex Frenzy</title>
   <style>
     body {
       background: #1e222d;
@@ -75,8 +75,9 @@
     }
     canvas {
       width: 100%;
-      height: 300px;
+      height: 200px;
       background: #1e222d;
+      margin-bottom: 10px;
     }
     button {
       background: #00ff00;
@@ -106,16 +107,16 @@
 </head>
 <body>
   <div id="login-screen">
-    <h1>$LOTTO: 12:17 Trading Rug Jamboree</h1>
-    <p>Connect your Phantom wallet to trade meme stocks and buy lottery tickets for the 12.17 SOL draw on June 21, 2026!</p>
+    <h1>$LOTTO: 12:17 Forex Frenzy</h1>
+    <p>Connect your Phantom wallet to trade forex markets, indices, and buy lottery tickets for the 12.17 SOL draw!</p>
     <button onclick="connectWallet()">Connect Phantom Wallet</button>
   </div>
   <div id="game-screen">
     <div id="chart-container">
       <div id="ticker">$LOTTO News: Buy tickets for the 12.17 SOL draw on June 21, 2026! | Prize Pool: 12.17 SOL</div>
       <canvas id="lotto-chart"></canvas>
-      <canvas id="hypecorp-chart"></canvas>
-      <canvas id="mooncoin-chart"></canvas>
+      <canvas id="solusd-chart"></canvas>
+      <canvas id="memeindex-chart"></canvas>
       <div class="tooltip" id="tooltip"></div>
     </div>
     <div id="sidebar">
@@ -124,12 +125,16 @@
       <p>Ticket Price: <span id="ticket-price">0.1 SOL</span></p>
       <p>Prize Pool: <span id="prize-pool">12.17 SOL</span></p>
       <p>Tickets Owned: <span id="tickets-owned">0</span></p>
+      <h2>Market Data</h2>
       <p>$LOTTO Price: <span id="token-price">0 SOL</span></p>
-      <p>HypeCorp Price: <span id="hypecorp-price">0.01 SOL</span></p>
-      <p>MoonCoin Price: <span id="mooncoin-price">0.005 SOL</span></p>
+      <p>SOL/USD: <span id="solusd-price">150.00</span></p>
+      <p>Meme Index: <span id="memeindex-price">1000.00</span></p>
+      <p>Portfolio Value: <span id="portfolio-value">0 SOL</span></p>
       <p>Wallet: <span id="wallet-address">Not connected</span></p>
       <p>SOL Balance: <span id="sol-balance">0</span></p>
       <button onclick="buyTicket()">Buy Lottery Ticket (0.1 SOL)</button>
+      <button onclick="tradeAsset('buy')">Buy Meme Stock (Mock)</button>
+      <button onclick="tradeAsset('sell')">Sell Meme Stock (Mock)</button>
       <a href="https://pump.fun" target="_blank"><button>Buy $LOTTO</button></a>
     </div>
   </div>
@@ -138,139 +143,134 @@
     let walletConnected = false;
     let walletPublicKey = null;
     let solBalance = 0;
-    let prizePool = 12.17; // Fixed prize pool
     let ticketCount = 0; // Mock: track tickets off-chain
-    let tokenPrice = 0.000001; // Mock: fetch from Pump.fun
-    let hypeCorpPrice = 0.01; // Mock meme stock
-    let moonCoinPrice = 0.005; // Mock meme stock
-    let lottoHistory = Array(10).fill(0.000001); // Candlestick mock data
-    let hypeCorpHistory = Array(10).fill(0.01);
-    let moonCoinHistory = Array(10).fill(0.005);
+    let prizePool = 12.17; // Fixed prize pool
+    let tokenPrice = 0.000001; // Mock: $LOTTO price
+    let solUsdPrice = 150.00; // Mock: SOL/USD forex pair
+    let memeIndexPrice = 1000.00; // Mock: Meme Index
+    let portfolio = { lotto: 0, solusd: 0, memeindex: 0 }; // Mock portfolio
+    let lottoHistory = Array(10).fill(0.000001);
+    let solUsdHistory = Array(10).fill(150.00);
+    let memeIndexHistory = Array(10).fill(1000.00);
     const DRAW_DATE = new Date('2026-06-21T00:00:00Z');
-    const disasters = ['Hurricane', 'Earthquake', 'Tech Crash', 'Meme Dip'];
-    let hypeCorpRugged = false;
-    let moonCoinRugged = false;
+    const newsEvents = [
+      'Meme Fed raises rates, SOL/USD dips!',
+      'Hedge Fund Bot pumps $LOTTO!',
+      'Crypto Index surges on NPC hype!',
+      'Meme Index crashes, traders panic!'
+    ];
+    const disasters = ['Hurricane', 'Flash Crash', 'NPC Hack', 'Market Freeze'];
 
-    // Update ticker, charts, and narrative
+    // NPC-driven market updates
+    function updateMarket() {
+      // NPC Meme Fed: Randomly adjust prices
+      tokenPrice *= (1 + (Math.random() - 0.5) * 0.1); // $LOTTO volatility
+      solUsdPrice *= (1 + (Math.random() - 0.5) * 0.05); // SOL/USD volatility
+      memeIndexPrice *= (1 + (Math.random() - 0.5) * 0.03); // Meme Index volatility
+
+      // Rug pulls (5% chance for $LOTTO or index)
+      if (Math.random() < 0.05) {
+        tokenPrice *= 0.1; // NPC-driven rug pull
+        lottoHistory.fill(tokenPrice); // Reset history
+      }
+      if (Math.random() < 0.05) {
+        memeIndexPrice *= 0.1; // NPC-driven index crash
+        memeIndexHistory.fill(memeIndexPrice);
+      }
+
+      // Update histories
+      lottoHistory.push(tokenPrice);
+      solUsdHistory.push(solUsdPrice);
+      memeIndexHistory.push(memeIndexPrice);
+      if (lottoHistory.length > 10) lottoHistory.shift();
+      if (solUsdHistory.length > 10) solUsdHistory.shift();
+      if (memeIndexHistory.length > 10) memeIndexHistory.shift();
+    }
+
+    // Update ticker, charts, and portfolio
     function updateTicker() {
       if (!walletConnected) return;
+      updateMarket();
       const now = new Date();
       const timeLeft = DRAW_DATE - now;
       const daysLeft = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-      let tickerText = `$LOTTO News: ${daysLeft} days until 12.17 SOL draw on June 21, 2026! | Prize Pool: ${prizePool.toFixed(2)} SOL`;
+      let tickerText = `$LOTTO News: ${daysLeft} days until 12.17 SOL draw! | Prize Pool: ${prizePool.toFixed(2)} SOL`;
 
-      // Simulate rug pulls (5% chance per stock)
-      if (!hypeCorpRugged && Math.random() < 0.05) {
-        hypeCorpRugged = true;
-        hypeCorpPrice = 0;
-        tickerText = `RUG PULL: HypeCorp crashes to 0 SOL! $LOTTO draw secure! | Prize Pool: ${prizePool.toFixed(2)} SOL`;
-      }
-      if (!moonCoinRugged && Math.random() < 0.05) {
-        moonCoinRugged = true;
-        moonCoinPrice = 0;
-        tickerText = `RUG PULL: MoonCoin crashes to 0 SOL! $LOTTO draw secure! | Prize Pool: ${prizePool.toFixed(2)} SOL`;
+      // Forex Factory-style news (10% chance)
+      if (Math.random() < 0.1) {
+        tickerText = newsEvents[Math.floor(Math.random() * newsEvents.length)];
       }
 
-      // Simulate AI-driven disasters (2% chance)
+      // AI-driven disasters (2% chance)
       if (Math.random() < 0.02) {
         const disaster = disasters[Math.floor(Math.random() * disasters.length)];
-        tickerText = `DISASTER: ${disaster} hits market! Prize pool secure at ${prizePool.toFixed(2)} SOL!`;
+        tickerText = `DISASTER: ${disaster} hits markets! Prize pool secure at ${prizePool.toFixed(2)} SOL!`;
+        tokenPrice *= 0.8; // Disaster impact
+        solUsdPrice *= 0.9;
+        memeIndexPrice *= 0.85;
       }
-
-      // Update prices
-      tokenPrice *= (1 + (Math.random() - 0.5) * 0.1);
-      if (!hypeCorpRugged) hypeCorpPrice *= (1 + (Math.random() - 0.5) * 0.05);
-      if (!moonCoinRugged) moonCoinPrice *= (1 + (Math.random() - 0.5) * 0.05);
-      lottoHistory.push(tokenPrice);
-      hypeCorpHistory.push(hypeCorpPrice);
-      moonCoinHistory.push(moonCoinPrice);
-      if (lottoHistory.length > 10) lottoHistory.shift();
-      if (hypeCorpHistory.length > 10) hypeCorpHistory.shift();
-      if (moonCoinHistory.length > 10) moonCoinHistory.shift();
 
       document.getElementById('ticker').textContent = tickerText;
       document.getElementById('draw-date').textContent = `June 21, 2026 (${daysLeft} days left)`;
       document.getElementById('prize-pool').textContent = `${prizePool.toFixed(2)} SOL`;
       document.getElementById('tickets-owned').textContent = ticketCount;
       document.getElementById('token-price').textContent = `${tokenPrice.toFixed(6)} SOL`;
-      document.getElementById('hypecorp-price').textContent = `${hypeCorpPrice.toFixed(4)} SOL`;
-      document.getElementById('mooncoin-price').textContent = `${moonCoinPrice.toFixed(4)} SOL`;
+      document.getElementById('solusd-price').textContent = `${solUsdPrice.toFixed(2)} USD`;
+      document.getElementById('memeindex-price').textContent = `${memeIndexPrice.toFixed(2)}`;
+      document.getElementById('portfolio-value').textContent = (
+        portfolio.lotto * tokenPrice +
+        portfolio.solusd * solUsdPrice / 100 +
+        portfolio.memeindex * memeIndexPrice / 1000
+      ).toFixed(4);
 
       drawCharts();
       setTimeout(updateTicker, 5000);
     }
 
-    // Draw candlestick and line charts
+    // Draw candlestick charts
     function drawCharts() {
-      // $LOTTO Candlestick Chart
-      const lottoCanvas = document.getElementById('lotto-chart');
-      const lottoCtx = lottoCanvas.getContext('2d');
-      lottoCtx.clearRect(0, 0, lottoCanvas.width, lottoCanvas.height);
-      const maxLotto = Math.max(...lottoHistory, 0.000001);
-      const minLotto = Math.min(...lottoHistory, 0.000001);
-      const rangeLotto = maxLotto - minLotto;
-      const candleWidth = lottoCanvas.width / (lottoHistory.length * 1.5);
-      lottoHistory.forEach((price, i) => {
-        const open = i > 0 ? lottoHistory[i - 1] : price;
-        const close = price;
-        const high = Math.max(open, close) * (1 + Math.random() * 0.02);
-        const low = Math.min(open, close) * (1 - Math.random() * 0.02);
-        const x = i * candleWidth * 1.5 + candleWidth / 2;
-        const yHigh = ((maxLotto - high) / rangeLotto) * lottoCanvas.height;
-        const yLow = ((maxLotto - low) / rangeLotto) * lottoCanvas.height;
-        const yOpen = ((maxLotto - open) / rangeLotto) * lottoCanvas.height;
-        const yClose = ((maxLotto - close) / rangeLotto) * lottoCanvas.height;
-        lottoCtx.beginPath();
-        lottoCtx.moveTo(x, yHigh);
-        lottoCtx.lineTo(x, yLow);
-        lottoCtx.strokeStyle = '#fff';
-        lottoCtx.stroke();
-        lottoCtx.fillStyle = close >= open ? '#00ff00' : '#ff0000';
-        lottoCtx.fillRect(x - candleWidth / 2, Math.min(yOpen, yClose), candleWidth, Math.abs(yClose - yOpen));
-      });
+      const charts = [
+        { canvasId: 'lotto-chart', history: lottoHistory, label: '$LOTTO' },
+        { canvasId: 'solusd-chart', history: solUsdHistory, label: 'SOL/USD' },
+        { canvasId: 'memeindex-chart', history: memeIndexHistory, label: 'Meme Index' }
+      ];
 
-      // HypeCorp Line Chart
-      const hypeCorpCanvas = document.getElementById('hypecorp-chart');
-      const hypeCorpCtx = hypeCorpCanvas.getContext('2d');
-      hypeCorpCtx.clearRect(0, 0, hypeCorpCanvas.width, hypeCorpCanvas.height);
-      hypeCorpCtx.beginPath();
-      const maxHypeCorp = Math.max(...hypeCorpHistory, 0.01);
-      hypeCorpHistory.forEach((price, i) => {
-        const x = i * (hypeCorpCanvas.width / (hypeCorpHistory.length - 1));
-        const y = hypeCorpCanvas.height - (price / maxHypeCorp) * hypeCorpCanvas.height;
-        if (i === 0) hypeCorpCtx.moveTo(x, y);
-        else hypeCorpCtx.lineTo(x, y);
-      });
-      hypeCorpCtx.strokeStyle = '#00ff00';
-      hypeCorpCtx.stroke();
+      charts.forEach(chart => {
+        const canvas = document.getElementById(chart.canvasId);
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const maxPrice = Math.max(...chart.history);
+        const minPrice = Math.min(...chart.history);
+        const range = maxPrice - minPrice || 0.000001;
+        const candleWidth = canvas.width / (chart.history.length * 1.5);
+        chart.history.forEach((price, i) => {
+          const open = i > 0 ? chart.history[i - 1] : price;
+          const close = price;
+          const high = Math.max(open, close) * (1 + Math.random() * 0.02);
+          const low = Math.min(open, close) * (1 - Math.random() * 0.02);
+          const x = i * candleWidth * 1.5 + candleWidth / 2;
+          const yHigh = ((maxPrice - high) / range) * canvas.height;
+          const yLow = ((maxPrice - low) / range) * canvas.height;
+          const yOpen = ((maxPrice - open) / range) * canvas.height;
+          const yClose = ((maxPrice - close) / range) * canvas.height;
+          ctx.beginPath();
+          ctx.moveTo(x, yHigh);
+          ctx.lineTo(x, yLow);
+          ctx.strokeStyle = '#fff';
+          ctx.stroke();
+          ctx.fillStyle = close >= open ? '#00ff00' : '#ff0000';
+          ctx.fillRect(x - candleWidth / 2, Math.min(yOpen, yClose), candleWidth, Math.abs(yClose - yOpen));
+        });
 
-      // MoonCoin Line Chart
-      const moonCoinCanvas = document.getElementById('mooncoin-chart');
-      const moonCoinCtx = moonCoinCanvas.getContext('2d');
-      moonCoinCtx.clearRect(0, 0, moonCoinCanvas.width, moonCoinCanvas.height);
-      moonCoinCtx.beginPath();
-      const maxMoonCoin = Math.max(...moonCoinHistory, 0.005);
-      moonCoinHistory.forEach((price, i) => {
-        const x = i * (moonCoinCanvas.width / (moonCoinHistory.length - 1));
-        const y = moonCoinCanvas.height - (price / maxMoonCoin) * moonCoinCanvas.height;
-        if (i === 0) moonCoinCtx.moveTo(x, y);
-        else moonCoinCtx.lineTo(x, y);
-      });
-      moonCoinCtx.strokeStyle = '#00ff00';
-      moonCoinCtx.stroke();
-
-      // Tooltip on hover
-      [lottoCanvas, hypeCorpCanvas, moonCoinCanvas].forEach((canvas, index) => {
+        // Tooltip on hover
         canvas.onmousemove = (e) => {
-          const tooltip = document.getElementById('tooltip');
           const rect = canvas.getBoundingClientRect();
           const x = e.clientX - rect.left;
-          const history = [lottoHistory, hypeCorpHistory, moonCoinHistory][index];
-          const maxPrice = Math.max(...history);
-          const indexAtX = Math.floor((x / canvas.width) * history.length);
-          if (indexAtX >= 0 && indexAtX < history.length) {
-            const price = history[indexAtX];
-            tooltip.textContent = `Price: ${price.toFixed(6)} SOL`;
+          const index = Math.floor((x / canvas.width) * chart.history.length);
+          if (index >= 0 && index < chart.history.length) {
+            const price = chart.history[index];
+            const tooltip = document.getElementById('tooltip');
+            tooltip.textContent = `${chart.label}: ${price.toFixed(6)}`;
             tooltip.style.display = 'block';
             tooltip.style.left = `${e.clientX + 10}px`;
             tooltip.style.top = `${e.clientY + 10}px`;
@@ -313,7 +313,7 @@
       }
     }
 
-    // Buy lottery ticket (mock, actual transaction requires backend)
+    // Buy lottery ticket (mock, actual requires backend)
     async function buyTicket() {
       if (!walletConnected) {
         alert('Connect your Phantom wallet!');
@@ -334,7 +334,7 @@
         );
         const signature = await window.solana.signAndSendTransaction(transaction);
         await connection.confirmTransaction(signature);
-        ticketCount += 1; // Mock: track off-chain
+        ticketCount += 1;
         solBalance -= 0.1;
         document.getElementById('tickets-owned').textContent = ticketCount;
         document.getElementById('sol-balance').textContent = solBalance.toFixed(4);
@@ -342,6 +342,27 @@
       } catch (err) {
         alert('Ticket purchase failed: ' + err.message);
       }
+    }
+
+    // Mock trade (buy/sell assets)
+    function tradeAsset(action) {
+      if (!walletConnected) {
+        alert('Connect your Phantom wallet!');
+        return;
+      }
+      const asset = Math.random() < 0.5 ? 'lotto' : Math.random() < 0.5 ? 'solusd' : 'memeindex';
+      const price = asset === 'lotto' ? tokenPrice : asset === 'solusd' ? solUsdPrice / 100 : memeIndexPrice / 1000;
+      if (action === 'buy') {
+        portfolio[asset] += 1;
+      } else if (portfolio[asset] > 0) {
+        portfolio[asset] -= 1;
+      }
+      document.getElementById('portfolio-value').textContent = (
+        portfolio.lotto * tokenPrice +
+        portfolio.solusd * solUsdPrice / 100 +
+        portfolio.memeindex * memeIndexPrice / 1000
+      ).toFixed(4);
+      alert(`${action.charAt(0).toUpperCase() + action.slice(1)} ${asset.toUpperCase()} (Mock)!`);
     }
   </script>
 </body>
